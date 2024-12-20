@@ -1,0 +1,61 @@
+pod_name: docmost_pod
+pod_draw_name: draw_pod
+jenkins_pod_name: jenkins_pod
+docmost_image: docmost/docmost:0.6.1
+db_image: postgres:16-alpine
+redis_image: docker.io/library/redis:7.2-alpine
+jenkins_image: jenkins/jenkins:2.491-jdk21
+docmost_db: db
+docmost_redis: redis
+docmost_docmost: docmost
+docmost_draw: draw
+jenkins_controller: jenkins
+jenkins_inbound_agent: jenkins-inbound
+docmost_draw_node_port: 8080
+docmost_draw_container_port: 8082
+docmost_docmost_node_port: 3001
+docmost_docmost_container_port: 3000
+jenkins_controller_node_port: 8081
+jenkins_controller_container_port: 8080
+jenkins_inbound_node-port: 50000
+jenkins_inbound_container_port: 50000
+command_retries: 5
+retry_delay: 10
+DRAWIO_URL: "http://localhost:{{ docmost_draw_container_port }}"
+db_env:
+  POSTGRES_DB: docmost
+  POSTGRES_USER: docmost
+  POSTGRES_PASSWORD: "{{ APP_SECRET }}"
+redis_env: {}
+docmost_env:
+  APP_URL: 'http://localhost:3000'
+  APP_SECRET: "{{ APP_SECRET }}"
+  DATABASE_URL: "postgresql://docmost:{{ APP_SECRET }}@db:5432/docmost?schema=public"
+  REDIS_URL: 'redis://redis:6379'
+  MAIL_DRIVER: 'smtp'
+  SMTP_HOST: 'smtp.mailgun.org'
+  SMTP_PORT: 587
+  SMTP_USERNAME: 'askativo@sandbox6dd96377f0684c9f98f9dd9bac107548.mailgun.org'
+  SMTP_PASSWORD: "{{ SMTP_PASSWORD }}"
+  SMTP_SECURE: 'false'
+  MAIL_FROM_ADDRESS: 'signup@docmost.localhost'
+  MAIL_FROM_NAME: 'Docmost'
+  DRAWIO_URL: "{{ DRAWIO_URL }}"
+jenkins_env: {}
+volumes:
+  - name: /Users/emmanuelmamudu/PodmanMachine/Docmost/Storage/docmost
+    path: /var/lib/docmost/storage
+  - name: /Users/emmanuelmamudu/PodmanMachine/Docmost/Storage/postgres
+    path: /var/lib/postgresql/data
+  - name: /Users/emmanuelmamudu/PodmanMachine/Docmost/Storage/redis
+    path: /var/lib/redis/data
+  - name: /Users/emmanuelmamudu/PodmanMachine/Jenkins/Storage/home
+    path: /var/jenkins_home
+draw_image: "docker.io/jgraph/drawio:latest"
+draw_ports: 
+  - port: "{{ docmost_draw_node_port }}:{{ docmost_draw_container_port }}"
+docmost_ports: 
+  - port: "{{ docmost_docmost_node_port }}:{{ docmost_docmost_container_port }}"
+jenkins_ports:
+  - port: "{{ jenkins_controller_node_port }}:{{ jenkins_controller_container_port }}"
+  - port: "{{ jenkins_inbound_container_port: }}:{{ jenkins_inbound_container_port }}"
