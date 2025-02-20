@@ -1,5 +1,5 @@
 [defaults]
-inventory = /Users/taiwobanjo/PodmanMachine/DevOps/devops-automation/inventory
+inventory = /Users/taiwobanjo/PodmanMachine/Automation-devops/inventory
 host_key_checking = false
 remote_user = taiwobanjo
 ask_pass = False

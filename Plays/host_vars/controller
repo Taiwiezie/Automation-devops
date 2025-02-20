@@ -1,10 +1,12 @@
 pod_name: docmost_pod
 pod_draw_name: draw_pod
 jenkins_pod_name: jenkins_pod
-docmost_image: docmost/docmost:0.6.1
+docmost_image: docmost/docmost:0.7.0
+#docmost_image: docmost/docmost:0.6.2
 db_image: postgres:16-alpine
 redis_image: docker.io/library/redis:7.2-alpine
-jenkins_image: jenkins/jenkins:2.491-jdk21
+jenkins_image: jenkins/jenkins:2.495-jdk21
+#jenkins_image: jenkins/jenkins:2.491-jdk21
 docmost_db: db
 docmost_redis: redis
 docmost_docmost: docmost
@@ -19,6 +21,9 @@ jenkins_controller_node_port: 8081
 jenkins_controller_container_port: 8080
 jenkins_inbound_node-port: 50000
 jenkins_inbound_container_port: 50000
+jenkins_agent_name: ansible-eda
+jenkins_agent_image: localhost/ansible-eda:python312-openjdk2106-v6
+startup_agent: "bash /home/jenkins/agent-start.sh"
 command_retries: 5
 retry_delay: 10
 DRAWIO_URL: "http://localhost:{{ docmost_draw_container_port }}"
@@ -29,27 +34,31 @@ db_env:
 redis_env: {}
 docmost_env:
   APP_URL: 'http://localhost:3000'
-  APP_SECRET: "{{ APP_SECRET }}"
-  DATABASE_URL: "postgresql://docmost:{{ APP_SECRET }}@db:5432/docmost?schema=public"
+  #APP_SECRET: "{{ APP_SECRET }}"
+  APP_SECRET: 'SECRET1234'
+  #DATABASE_URL: "postgresql://docmost:{{ APP_SECRET }}@db:5432/docmost?schema=public"
+  DATABASE_URL: "postgresql://docmost:SECRET1234@db:5432/docmost?schema=public"
   REDIS_URL: 'redis://redis:6379'
   MAIL_DRIVER: 'smtp'
   SMTP_HOST: 'smtp.mailgun.org'
   SMTP_PORT: 587
-  SMTP_USERNAME: 'askativo@sandbox6dd96377f0684c9f98f9dd9bac107548.mailgun.org'
-  SMTP_PASSWORD: "{{ SMTP_PASSWORD }}"
+  #SMTP_USERNAME: "{{ SMTP_USERNAME }}"
+  SMTP_USERNAME: 'postmaster@sandbox7b67e09d04a248f5bbfee0193d27cdf5.mailgun.org'
+  SMTP_PASSWORD: '80a6817f47051c7285beae6cb8325d85-7113c52e-cc32a116'
+  #SMTP_PASSWORD: "{{ SMTP_PASSWORD }}"
   SMTP_SECURE: 'false'
   MAIL_FROM_ADDRESS: 'signup@docmost.localhost'
   MAIL_FROM_NAME: 'Docmost'
   DRAWIO_URL: "{{ DRAWIO_URL }}"
 jenkins_env: {}
 volumes:
-  - name: /Users/emmanuelmamudu/PodmanMachine/Docmost/Storage/docmost
+  - name: /Users/taiwobanjo/PodmanMachine/Misc/storage/docmost
     path: /var/lib/docmost/storage
-  - name: /Users/emmanuelmamudu/PodmanMachine/Docmost/Storage/postgres
+  - name: /Users/taiwobanjo/PodmanMachine/Misc/storage/postgres
     path: /var/lib/postgresql/data
-  - name: /Users/emmanuelmamudu/PodmanMachine/Docmost/Storage/redis
+  - name: /Users/taiwobanjo/PodmanMachine/Misc/storage/redis
     path: /var/lib/redis/data
-  - name: /Users/emmanuelmamudu/PodmanMachine/Jenkins/Storage/home
+  - name: /Users/taiwobanjo/PodmanMachine/Misc/storage/jenkins/home
     path: /var/jenkins_home
 draw_image: "docker.io/jgraph/drawio:latest"
 draw_ports: 

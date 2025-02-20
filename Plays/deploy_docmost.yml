@@ -7,7 +7,9 @@
   tasks:
     - name: Ensure Podman draw pod is created
       containers.podman.podman_pod:
+        executable: /usr/local/bin/podman
         name: "{{ pod_draw_name }}"
+        network_alias: podman
         state: started
         ports:
           - "{{ docmost_draw_node_port }}:{{ docmost_draw_container_port }}"
@@ -15,7 +17,9 @@
 
     - name: Ensure Podman docmost pod is created
       containers.podman.podman_pod:
+        executable: /usr/local/bin/podman
         name: "{{ pod_name }}"
+        network_alias: podman
         state: started
         ports:
           - "{{ docmost_docmost_node_port }}:{{ docmost_docmost_container_port }}"
@@ -23,7 +27,9 @@
 
     - name: Ensure Podman jenkins pod is created
       containers.podman.podman_pod:
+        executable: /usr/local/bin/podman
         name: "{{ jenkins_pod_name }}"
+        network_alias: podman
         state: started
         ports:
           - "{{ jenkins_controller_node_port }}:{{ jenkins_controller_container_port }}"
@@ -32,6 +38,7 @@
 
     - name: Ensure the drawio service is started and attached to the pod
       containers.podman.podman_container:
+        executable: /usr/local/bin/podman
         name: "{{ docmost_draw }}"
         state: started
         pod: "{{ pod_draw_name }}"
@@ -41,6 +48,7 @@
 
     - name: Run the PostgreSQL container
       containers.podman.podman_container:
+        executable: /usr/local/bin/podman
         name: "{{ docmost_db }}"
         pod: "{{ pod_name }}"
         image: "{{ db_image }}"
@@ -53,6 +61,7 @@
 
     - name: Run the Redis container
       containers.podman.podman_container:
+        executable: /usr/local/bin/podman
         name: "{{ docmost_redis }}"
         pod: "{{ pod_name }}"
         image: "{{ redis_image }}"
@@ -64,6 +73,7 @@
 
     - name: Run the Docmost application container
       containers.podman.podman_container:
+        executable: /usr/local/bin/podman
         name: "{{ docmost_docmost }}"
         pod: "{{ pod_name }}"
         image: "{{ docmost_image }}"
@@ -76,6 +86,7 @@
 
     - name: Run the Jenkins CI container
       containers.podman.podman_container:
+        executable: /usr/local/bin/podman
         name: "{{ jenkins_controller }}"
         pod: "{{ jenkins_pod_name }}"
         image: "{{ jenkins_image }}"
@@ -86,38 +97,53 @@
           - "{{ volumes[3].name }}:{{ volumes[3].path }}"
       tags: start_service
 
+    - name: Run the Jenkins Agent Container
+      containers.podman.podman_container:
+        executable: /usr/local/bin/podman
+        name: "{{ jenkins_agent_name }}"
+        pod: "{{ jenkins_pod_name }}"
+        image: "{{ jenkins_image }}"
+        state: started
+        restart_policy: unless-stopped
+        command: "{{ startup_agent }}"
+        user: "{{ jenkins_controller }}"
+      tags: start_service
+
     - name: Ensure Podman draw pod does not exist
       containers.podman.podman_pod:
+        executable: /usr/local/bin/podman
         name: "{{ pod_draw_name }}"
         state: absent
       tags: stop_draw_service
 
     - name: Ensure Podman pod does not exist
       containers.podman.podman_pod:
+        executable: /usr/local/bin/podman
         name: "{{ pod_name }}"
         state: absent
       tags: stop_docmost_service
 
     - name: Ensure Podman pod does not exist
       containers.podman.podman_pod:
+        executable: /usr/local/bin/podman
         name: "{{ jenkins_pod_name }}"
         state: absent
       tags: stop_jenkins_service
 
-    - name: "Verify service is up {{ docmost_docmost }}"
-    # We firstly check docmost is up as it takes longer than draw.
-      ansible.builtin.command: "podman logs {{ docmost_docmost }}"
+    - name: Verify service is up {{ docmost_docmost }}
+      ansible.builtin.command: podman logs {{ docmost_docmost }}
       register: docmost_docmost_logs
-      until: "'Nest application successfully started' in docmost_docmost_logs.stdout"
       retries: "{{ command_retries }}"
       delay: "{{ retry_delay }}"
+      until: "'Nest application successfully started' in docmost_docmost_logs.stdout"
       failed_when: "'Nest application successfully started' not in docmost_docmost_logs.stdout"
+      changed_when: false  # Add this line
       tags: start_service
-  
-    # - name: "Print logs for debugging in case of failure."
-    #   ansible.builtin.debug:
-    #     var: docmost_docmost_logs.stdout_lines
-    #   when: "'Nest application successfully started' not in docmost_docmost_logs.stdout"
+
+    - name: "Print logs for debugging in case of failure."
+      ansible.builtin.debug:
+        var: docmost_docmost_logs.stdout_lines
+      when: "'Nest application successfully started' not in docmost_docmost_logs.stdout"
 
     # - name: "Verify  service is up {{ docmost_draw }}"
     #   ansible.builtin.command: "podman exec -it {{ docmost_draw }} curl {{ DRAWIO_URL }}"
