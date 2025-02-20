@@ -102,7 +102,7 @@
         executable: /usr/local/bin/podman
         name: "{{ jenkins_agent_name }}"
         pod: "{{ jenkins_pod_name }}"
-        image: "{{ jenkins_image }}"
+        image: "{{ jenkins_agent_image }}"
         state: started
         restart_policy: unless-stopped
         command: "{{ startup_agent }}"

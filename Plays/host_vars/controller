@@ -22,7 +22,7 @@ jenkins_controller_container_port: 8080
 jenkins_inbound_node-port: 50000
 jenkins_inbound_container_port: 50000
 jenkins_agent_name: ansible-eda
-jenkins_agent_image: localhost/ansible-eda:python312-openjdk2106-v6
+jenkins_agent_image: localhost/ansible-eda:python312-openjdk2106-v7
 startup_agent: "bash /home/jenkins/agent-start.sh"
 command_retries: 5
 retry_delay: 10
